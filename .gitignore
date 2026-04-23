@@ -1,0 +1,5 @@
+tests
+*.md
+!roadmap.md
+!blueprint.md
+.*

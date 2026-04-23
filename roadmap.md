@@ -1,0 +1,52 @@
+- [ ] Implement datom.h
+  - [ ] Create datom-msvc.h and implement it
+  - [ ] Create datom-cc.h
+  - [ ] Create datom-any.h
+  - [ ] Write macro guards and include them in the implement section of datom.h
+- [ ] Implement err functions in cality.h
+  - [ ] Create err.c
+- [ ] Implement rands/hashes in recepta.h
+  - [ ] Create rand.c and hash.c
+- [ ] Implement memory arena in recepta.h
+  - [ ] Create arena.c
+- [ ] Implement Stack/Sequence/Queue in silo.h
+  - [ ] Create linear.c
+- [ ] Implement Slitr/Strand in silo.h
+  - [ ] Create string.c and implement basic functions
+  - [ ] Implement the rune functions
+  - [ ] Implement Structural Regular Expresion
+    - [ ] Create sttregex.c
+    - [ ] Implement the engine
+    - [ ] Implement the parser and sttregex() function
+  - [ ] Implement fmt functions 
+    - [ ] Create fmt.c
+    - [ ] Implement formatters for individual types
+    - [ ] Implement dofmt and fmtinstall registration
+    - [ ] Implement the a verb. Note that the arguments for the format string should be va_copy-ed before feeding dofmt() except for the last element.
+    - [ ] Implement vfmts()
+- [ ] Implement Set/Map/Multiset in silo.h
+  - [ ] Implement set.c. All associative silos use qhash() for hashing.
+  - [ ] Implement map.c. The map is a combination of swisstable (metadata) and robin hood. Do not use SIMD if datom.h doesn't define one.
+    - [ ] Write and revise thoughts on implementation details before work
+  - [ ] Implement multiset.c.
+    - [ ] Choose wisely the data structure
+      - [ ] Write a report for the choice
+- [ ] Implement general functions for silos in silo.h
+  - [ ] Create silo.c
+  - [ ] Implement iter.c
+- [ ] Design API for the data topology container in nexus.h
+  - [ ] Ask user to revise the designed API
+- [ ] Implement Lattice/List/Skiplist
+- [ ] Implement Bitree/Mtree
+- [ ] Implement Indeltree/Retrxtree
+- [ ] Implement Array Mapped Trie
+- [ ] Implement Ugraph/DAG
+- [ ] Implement the I/O functions in recepta.h
+  - [ ] Map the permission bits
+- [ ] Implement Buffered I/O in recepta.h
+- [ ] Implement collateral functions in recepta.h
+- [ ] Implement xpedt in recepta.h
+  - [ ] Write analyses on how the DAG and source no. should be resolved
+  - [ ] Craft drafts on parallel strategies
+- [ ] Implement segheap according to blueprint.md
+- [ ] Implement sparsplane
