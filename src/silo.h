@@ -31,7 +31,7 @@ typedef struct {
 	void  *x;
 } arrst;
 
-arrst mkarrst(uvlong len, void *x) { return ( arrst ) {len, x}; }
+static arrst inline mkarrst(uvlong len, void *x) { return ( arrst ) {len, x}; }
 
 #define arrstof(type, ...) mkarrst(args(type, __VA_ARGS__))
 /* @brief Convert a C array to an array struct */
@@ -89,7 +89,7 @@ typedef struct {
 	arrst b;
 } pair;
 
-pair mkpair(arrst a, arrst b) { return ( pair ) {a, b}; }
+static pair inline mkpair(arrst a, arrst b) { return ( pair ) {a, b}; }
 
 #define umpair(p) p.a, p.b
 int    mkmap(int arena);
@@ -114,7 +114,7 @@ void   rmmap(int map);
  * '' becomes null string, '''' becomes a string containing a single quote */
 uvlong tknize(char *str, char **arr, uvlong max);
 
-bool   chkrune(rune r) { return r < 0x110000 && (r < 0xd800 || r > 0xdfff); }
+static bool inline chkrune(rune r) { return r < 0x110000 && (r < 0xd800 || r > 0xdfff); }
 
 /* @brief Convert a Unicode rune to char sequences
  * @return The number of bytes stored */
@@ -124,7 +124,7 @@ uvlong runetochar(char *s, rune *r);
 uvlong chartorune(rune *r, char *s);
 
 /* @return The number of bytes required to convert r into UTF */
-int    runelen(rune r) {
+static int inline runelen(rune r) {
 	return r < 0x80 ? 1 : r < 0x800 ? 2 : r < 0x10000 ? 3 : r < 0x110000 ? 4 : errmsg("Invalid Rune"), -1;
 }
 
@@ -133,7 +133,7 @@ uvlong runenlen(rune *r, uvlong n);
 
 /* @brief Check if the char sequences represent a rune aright
  * @param[out] r Pointer to store the rune if the sequences are complete, can be null */
-bool   fullrune(char *s, int n, rune *r) {
+static bool inline fullrune(char *s, int n, rune *r) {
 	rune t;
 	return ( uchar ) s [0] < 0x80 ? (n != 1 ? false : r ? *r = s [0], true : true)
 	     : ( uchar ) s [0] < 0xe0
@@ -187,11 +187,11 @@ typedef struct {
 	uvlong len;
 } slitr;
 
-slitr mkslitr(char *s, uvlong len) { return ( slitr ) {s, len}; }
+static slitr inline mkslitr(char *s, uvlong len) { return ( slitr ) {s, len}; }
 
 #define umslitr(s) s.s, s.len
 
-slitr subslitr(char *s, vlong start, vlong end) { return ( slitr ) {s + start, end - start + 1}; }
+static slitr inline subslitr(char *s, vlong start, vlong end) { return ( slitr ) {s + start, end - start + 1}; }
 
 rune  nth(slitr s, vlong n);
 /* Dynamic String */
@@ -234,7 +234,7 @@ int   runetostr(int arena, rune *r);
 int   strtorune(int arena, char *s);
 #define vargs(...) vargs_(0, ##__VA_ARGS__)
 
-va_list vargs_(int dummy, ...) {
+static va_list inline vargs_(int dummy, ...) {
 	va_list args;
 	va_start(args, dummy);
 	return args;
@@ -280,7 +280,7 @@ enum
  * Custom Verbs may be installed using fmtinstall(). */
 int vfmts(int arena, char *fm, va_list args);
 
-int fmts(int arena, char *fm, ...) {
+static int inline fmts(int arena, char *fm, ...) {
 	va_list args;
 	va_start(args, fm);
 	int res = vfmts(arena, fm, args);
@@ -294,14 +294,14 @@ bool   dofmt(fmt *fp);
 void   fmtinstall(rune c, bool (*fn)(fmt *));
 
 int    mkmultiset(int arena);
-void   addms(int ms, array data);
+void   addms(int ms, arrst data);
 /* @brief Delete single instance */
-void   delms(int ms, array data);
+void   delms(int ms, arrst data);
 /* @brief Remove all occurrences */
-void   prgms(int ms, array data);
-bool   memms(int ms, array data);
+void   prgms(int ms, arrst data);
+bool   memms(int ms, arrst data);
 /* @brief Count occurrences of specific data */
-uvlong cntms(int ms, array data);
+uvlong cntms(int ms, arrst data);
 /* @brief Combine multiplicities */
 void   addtums(int dms, int ms);
 /* @brief Max multiplicity */

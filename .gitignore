@@ -1,4 +1,4 @@
-tests
+build
 *.md
 !roadmap.md
 !blueprint.md

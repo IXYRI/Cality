@@ -47,9 +47,9 @@ int mkxpedt(int arena);
  * @note The src-dst pair consists of the source element and the result destination */
 int fmap(int xpedt, int src, xrslt rs, void (*fn)(pair sd, void *), void *args);
 int filt(int xpedt, int src, bool (*pred)(arrst i, void *), void *args);
-int sort(int xpedt, int src, int (*cmp)(void *, void *, void *), void *args)   // smooth sort
-  /* @brief Collect source elements into a silo of specified type */
-  int mold(int xpedt, int src, silotype t);
+int sort(int xpedt, int src, int (*cmp)(void *, void *, void *), void *args);   // smooth sort
+/* @brief Collect source elements into a silo of specified type */
+int mold(int xpedt, int src, silotype t);
 /* @brief Fold the source silo into a single value
  * @param init Initial value of the result type */
 int pare(int xpedt, int src, xrslt rs, void *init, void (*red)(arrst acc, arrst i, arrst dst, void *), void *args);
@@ -83,9 +83,9 @@ int ximmix(int xpedt, int srca, int srcb);
 /* @brief Catenate two sources */
 int catena(int xpedt, int srca, int srcb);
 /* @brief Merge two sorted sources */
-int xmerge(int xpedt, int srca, int srcb, int (*cmp)(void *, void *, void *), void *args)   // merge sort
-  /* @brief Repeat the source infinitely */
-  int xrecur(int xpedt, int src);
+int xmerge(int xpedt, int srca, int srcb, int (*cmp)(void *, void *, void *), void *args);   // merge sort
+/* @brief Repeat the source infinitely */
+int xrecur(int xpedt, int src);
 /* @brief Slide a window over the source */
 int xorama(int xpedt, int src, uvlong size, uvlong stride);
 
@@ -102,7 +102,7 @@ typedef union xprod
  * Sources form a directed acyclic graph. Each x-function depends on one or more upstream sources and returns a source number, which represents a deferred computation node. Unresolved sources are placeholders for concrete silos or values that will be provided later. */
 void vxact(int xpedt, xprod *out, va_list silos);
 
-void xact(int xpedt, xprod *out, ...) {
+static void inline xact(int xpedt, xprod *out, ...) {
 	va_list silos;
 	va_start(silos, out);
 	vxact(xpedt, out, silos);
@@ -145,25 +145,25 @@ void rmxpedt(int xpedt);
 
 // non thread-safe, and do parallel strategy
 
-typedef struct rwx : uchar {
+typedef struct rwx {
 	bool r:1;
 	bool w:1;
 	bool x:1; /* walk permission for directories */
 } rwx;
 
-typedef struct accs : ushort {
-	rwx other:3;
-	rwx group:3;
-	rwx owner:3;
+typedef struct accs {
+	uchar other:3;
+	uchar group:3;
+	uchar owner:3;
 } accs;
 
-typedef struct perm : uint {
-	accs      :9;
-	bool isdir:1;
-	bool islnk:1;
+typedef struct perm {
+	ushort accs :9;
+	bool   isdir:1;
+	bool   islnk:1;
 } perm;
 
-typedef struct omode : uint {
+typedef struct omode {
 	bool r:1;
 	bool w:1;
 	bool x:1; /* result to an error if the file already exists for create() */

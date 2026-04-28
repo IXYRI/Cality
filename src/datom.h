@@ -1,5 +1,7 @@
 #pragma once
-#if sizeof(long) == 8
+#include <limits.h>
+
+#if ULONG_MAX == 0xffff'ffff'ffff'ffffull
   #define vlong long
 #else
   #define vlong long long
@@ -227,3 +229,10 @@ int cmp_st(tlong a, tlong b);
 
 
 /* Implementation */
+#if defined(__clang__) || defined(__GNUC__)
+  #include "datom-cc.h"
+#elif defined(_MSC_VER)
+  #include "datom-msvc.h"
+#endif
+
+#include "datom-any.h"

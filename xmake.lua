@@ -20,10 +20,13 @@ for _, tp in ipairs(os.files("tests/*.c")) do
 	local test = path.basename(tp)
 	local deps = {}
 	target(test)
-		for dep in test:match("test(.-)[-.]"):gmatch("([^,]+)") do
-			table.insert(deps, dep)
-		end
-		add_deps(deps)
-		add_test(test)
+        local match_str = test:match("test(.-)[-.]")
+        if match_str and match_str ~= "" then
+		    for dep in match_str:gmatch("([^,]+)") do
+			    table.insert(deps, dep)
+		    end
+        end
+		add_deps("cality")
+		add_tests(test)
 		add_files(tp)
 end
