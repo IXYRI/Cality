@@ -3,25 +3,47 @@
 
 // Clang & GCC specific implementations using __builtin
 
-static inline int clz(uint x) { return x ? __builtin_clz(x) : 32; }
-static inline int ctz(uint x) { return x ? __builtin_ctz(x) : 32; }
-static inline int popcnt(uint x) { return __builtin_popcount(x); }
-static inline uint bswap(uint x) { return __builtin_bswap32(x); }
+int inline clz(uint x) { return x ? __builtin_clz(x) : 32; }
 
-static inline int clz_vl(uvlong x) { return x ? __builtin_clzll(x) : 64; }
-static inline int ctz_vl(uvlong x) { return x ? __builtin_ctzll(x) : 64; }
-static inline int popcnt_vl(uvlong x) { return __builtin_popcountll(x); }
-static inline uvlong bswap_vl(uvlong x) { return __builtin_bswap64(x); }
+int inline ctz(uint x) { return x ? __builtin_ctz(x) : 32; }
 
-static inline uint rol(uint x, int k) { return (x << k) | (x >> (32 - k)); }
-static inline uint ror(uint x, int k) { return (x >> k) | (x << (32 - k)); }
-static inline uvlong rol_vl(uvlong x, int k) { return (x << k) | (x >> (64 - k)); }
-static inline uvlong ror_vl(uvlong x, int k) { return (x >> k) | (x << (64 - k)); }
+int inline popcnt(uint x) { return __builtin_popcount(x); }
 
-static inline bool chkadd(uint a, uint b, uint *out) { return __builtin_add_overflow(a, b, out); }
-static inline bool chksub(uint a, uint b, uint *out) { return __builtin_sub_overflow(a, b, out); }
-static inline bool chkmul(uint a, uint b, uint *out) { return __builtin_mul_overflow(a, b, out); }
+uint inline bswap(uint x) { return __builtin_bswap32(x); }
 
-static inline bool chkadd_vl(uvlong a, uvlong b, uvlong *out) { return __builtin_add_overflow(a, b, out); }
-static inline bool chksub_vl(uvlong a, uvlong b, uvlong *out) { return __builtin_sub_overflow(a, b, out); }
-static inline bool chkmul_vl(uvlong a, uvlong b, uvlong *out) { return __builtin_mul_overflow(a, b, out); }
+int inline clz_vl(uvlong x) { return x ? __builtin_clzll(x) : 64; }
+
+int inline ctz_vl(uvlong x) { return x ? __builtin_ctzll(x) : 64; }
+
+int inline popcnt_vl(uvlong x) { return __builtin_popcountll(x); }
+
+uvlong inline bswap_vl(uvlong x) { return __builtin_bswap64(x); }
+
+uint inline rol(uint x, int k) { return (x << k) | (x >> (32 - k)); }
+
+uint inline ror(uint x, int k) { return (x >> k) | (x << (32 - k)); }
+
+uvlong inline rol_vl(uvlong x, int k) { return (x << k) | (x >> (64 - k)); }
+
+uvlong inline ror_vl(uvlong x, int k) { return (x >> k) | (x << (64 - k)); }
+
+bool inline chkadd(uint a, uint b, uint *out) { return __builtin_add_overflow(a, b, out); }
+
+bool inline chksub(uint a, uint b, uint *out) { return __builtin_sub_overflow(a, b, out); }
+
+bool inline chkmul(uint a, uint b, uint *out) { return __builtin_mul_overflow(a, b, out); }
+
+bool inline chkadd_vl(uvlong a, uvlong b, uvlong *out) { return __builtin_add_overflow(a, b, out); }
+
+bool inline chksub_vl(uvlong a, uvlong b, uvlong *out) { return __builtin_sub_overflow(a, b, out); }
+
+bool inline chkmul_vl(uvlong a, uvlong b, uvlong *out) { return __builtin_mul_overflow(a, b, out); }
+
+#ifdef __SIZEOF_INT128__
+  #define HAS_WMUL_VL
+
+urlong inline wmul_vl(uvlong a, uvlong b) {
+	unsigned __int128 p = ( unsigned __int128 ) a * b;
+	return ( urlong ) {( uvlong ) p, ( uvlong ) (p >> 64)};
+}
+#endif

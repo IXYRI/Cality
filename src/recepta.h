@@ -102,7 +102,7 @@ typedef union xprod
  * Sources form a directed acyclic graph. Each x-function depends on one or more upstream sources and returns a source number, which represents a deferred computation node. Unresolved sources are placeholders for concrete silos or values that will be provided later. */
 void vxact(int xpedt, xprod *out, va_list silos);
 
-static void inline xact(int xpedt, xprod *out, ...) {
+void inline xact(int xpedt, xprod *out, ...) {
 	va_list silos;
 	va_start(silos, out);
 	vxact(xpedt, out, silos);
@@ -112,7 +112,7 @@ static void inline xact(int xpedt, xprod *out, ...) {
 /* @brief Register one batch job without evaluation */
 void vxpass(int xpedt, xprod *out, va_list silos);
 
-void xpass(int xpedt, xprod *out, ...) {
+void inline xpass(int xpedt, xprod *out, ...) {
 	va_list silos;
 	va_start(silos, out);
 	vxpass(xpedt, out, silos);
@@ -122,7 +122,7 @@ void xpass(int xpedt, xprod *out, ...) {
 /* @brief Register one batch job and a callback function for the result */
 void vxcall(int xpedt, void (*fn)(xprod *out, void *), void *args, va_list silos);
 
-void xcall(int xpedt, void (*fn)(xprod *out, void *), void *args, ...) {
+void inline xcall(int xpedt, void (*fn)(xprod *out, void *), void *args, ...) {
 	va_list silos;
 	va_start(silos, args);
 	vxcall(xpedt, fn, args, silos);
@@ -132,7 +132,7 @@ void xcall(int xpedt, void (*fn)(xprod *out, void *), void *args, ...) {
 /* @brief Register one batch job and a callback function for each element of the result */
 void vxcalleach(int xpedt, void (*fn)(xprod *out, void *), void *args, va_list silos);
 
-void xcalleach(int xpedt, void (*fn)(xprod *out, void *), void *args, ...) {
+void inline xcalleach(int xpedt, void (*fn)(xprod *out, void *), void *args, ...) {
 	va_list silos;
 	va_start(silos, args);
 	vxcalleach(xpedt, fn, args, silos);
@@ -236,7 +236,7 @@ void   bputc(int bd, char c);
 void   bputrune(int bd, rune r);
 uvlong bvprint(int bd, char *fm, va_list args);
 
-uvlong bprint(int bd, char *fm, ...) {
+uvlong inline bprint(int bd, char *fm, ...) {
 	va_list args;
 	va_start(args, fm);
 	bvprint(bd, fm, args);

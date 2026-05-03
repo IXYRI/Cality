@@ -31,7 +31,7 @@ typedef struct {
 	void  *x;
 } arrst;
 
-static arrst inline mkarrst(uvlong len, void *x) { return ( arrst ) {len, x}; }
+arrst inline mkarrst(uvlong len, void *x) { return ( arrst ) {len, x}; }
 
 #define arrstof(type, ...) mkarrst(args(type, __VA_ARGS__))
 /* @brief Convert a C array to an array struct */
@@ -89,7 +89,7 @@ typedef struct {
 	arrst b;
 } pair;
 
-static pair inline mkpair(arrst a, arrst b) { return ( pair ) {a, b}; }
+pair inline mkpair(arrst a, arrst b) { return ( pair ) {a, b}; }
 
 #define umpair(p) p.a, p.b
 int    mkmap(int arena);
@@ -114,7 +114,7 @@ void   rmmap(int map);
  * '' becomes null string, '''' becomes a string containing a single quote */
 uvlong tknize(char *str, char **arr, uvlong max);
 
-static bool inline chkrune(rune r) { return r < 0x110000 && (r < 0xd800 || r > 0xdfff); }
+bool inline chkrune(rune r) { return r < 0x110000 && (r < 0xd800 || r > 0xdfff); }
 
 /* @brief Convert a Unicode rune to char sequences
  * @return The number of bytes stored */
@@ -124,8 +124,8 @@ uvlong runetochar(char *s, rune *r);
 uvlong chartorune(rune *r, char *s);
 
 /* @return The number of bytes required to convert r into UTF */
-static int inline runelen(rune r) {
-	return r < 0x80 ? 1 : r < 0x800 ? 2 : r < 0x10000 ? 3 : r < 0x110000 ? 4 : errmsg("Invalid Rune"), -1;
+uvlong inline runelen(rune r) {
+	return r < 0x80 ? 1 : r < 0x800 ? 2 : r < 0x10000 ? 3 : r < 0x110000 ? 4 : (errmsg("Invalid Rune"), 5);
 }
 
 /* @return The number of bytes required to convert the n runes pointed by r into UTF */
@@ -133,16 +133,18 @@ uvlong runenlen(rune *r, uvlong n);
 
 /* @brief Check if the char sequences represent a rune aright
  * @param[out] r Pointer to store the rune if the sequences are complete, can be null */
-static bool inline fullrune(char *s, int n, rune *r) {
+bool inline fullrune(char *s, int n, rune *r) {
 	rune t;
-	return ( uchar ) s [0] < 0x80 ? (n != 1 ? false : r ? *r = s [0], true : true)
+	return ( uchar ) s [0] < 0x80 ? (n != 1 ? false : r ? (*r = s [0], true) : true)
 	     : ( uchar ) s [0] < 0xe0
 	       ? (n != 2                    ? false
 			   : (s [0] & 0xe0) != 0xc0 ? false
 			   : (s [1] & 0xc0) != 0x80 ? false
 										: !chkrune(t = ((( rune ) s [0] & 0x1f) << 6 | s [1] & 0x3f))
 				 ? errmsg("Invalid Rune"),
-			   false : n != runelen(t) ? errmsg("UTF Overlong"), false : r ? *r = t, true : true)
+			   false
+			   : n != runelen(t) ? (errmsg("UTF Overlong"), false)
+								 : r ? (*r = t, true) : true)
 	     : ( uchar ) s [0] < 0xf0
 	       ? (n != 3                    ? false
 			   : (s [1] & 0xc0) != 0x80 ? false
@@ -150,7 +152,9 @@ static bool inline fullrune(char *s, int n, rune *r) {
 				 ? false
 				 : !chkrune(t = ((( rune ) s [0] & 0xf) << 12 | (( rune ) s [1] & 0x3f) << 6 | s [2] & 0x3f))
 				 ? errmsg("Invalid Rune"),
-			   false : n != runelen(t) ? errmsg("UTF Overlong"), false : r ? *r = t, true : true)
+			   false
+			   : n != runelen(t) ? (errmsg("UTF Overlong"), false)
+								 : r ? (*r = t, true) : true)
 	     : ( uchar ) s [0] < 0xf8
 	       ? (n != 4                    ? false
 			   : (s [1] & 0xc0) != 0x80 ? false
@@ -162,7 +166,9 @@ static bool inline fullrune(char *s, int n, rune *r) {
 					 = ((( rune ) s [0] & 0x7) << 18 | (( rune ) s [1] & 0x3f) << 12 | (( rune ) s [2] & 0x3f) << 6 | s [3] & 0x3f)
 				   )
 				 ? errmsg("Invalid Rune"),
-			   false : n != runelen(t) ? errmsg("UTF Overlong"), false : r ? *r = t, true : true)
+			   false
+			   : n != runelen(t) ? (errmsg("UTF Overlong"), false)
+								 : r ? (*r = t, true) : true)
 	       : false;
 }
 
@@ -187,11 +193,11 @@ typedef struct {
 	uvlong len;
 } slitr;
 
-static slitr inline mkslitr(char *s, uvlong len) { return ( slitr ) {s, len}; }
+slitr inline mkslitr(char *s, uvlong len) { return ( slitr ) {s, len}; }
 
 #define umslitr(s) s.s, s.len
 
-static slitr inline subslitr(char *s, vlong start, vlong end) { return ( slitr ) {s + start, end - start + 1}; }
+slitr inline subslitr(char *s, vlong start, vlong end) { return ( slitr ) {s + start, end - start + 1}; }
 
 rune  nth(slitr s, vlong n);
 /* Dynamic String */
@@ -234,7 +240,7 @@ int   runetostr(int arena, rune *r);
 int   strtorune(int arena, char *s);
 #define vargs(...) vargs_(0, ##__VA_ARGS__)
 
-static va_list inline vargs_(int dummy, ...) {
+va_list inline vargs_(int dummy, ...) {
 	va_list args;
 	va_start(args, dummy);
 	return args;
@@ -280,7 +286,7 @@ enum
  * Custom Verbs may be installed using fmtinstall(). */
 int vfmts(int arena, char *fm, va_list args);
 
-static int inline fmts(int arena, char *fm, ...) {
+int inline fmts(int arena, char *fm, ...) {
 	va_list args;
 	va_start(args, fm);
 	int res = vfmts(arena, fm, args);
