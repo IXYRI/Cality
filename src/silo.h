@@ -31,7 +31,7 @@ typedef struct {
 	void  *x;
 } arrst;
 
-arrst mkarrst(uvlong len, void *x) { return ( arrst ) {len, x}; }
+static arrst inline mkarrst(uvlong len, void *x) { return ( arrst ) {len, x}; }
 
 #define arrstof(type, ...) mkarrst(args(type, __VA_ARGS__))
 /* @brief Convert a C array to an array struct */
@@ -89,7 +89,7 @@ typedef struct {
 	arrst b;
 } pair;
 
-pair mkpair(arrst a, arrst b) { return ( pair ) {a, b}; }
+static pair inline mkpair(arrst a, arrst b) { return ( pair ) {a, b}; }
 
 #define umpair(p) p.a, p.b
 int    mkmap(int arena);
@@ -114,7 +114,7 @@ void   rmmap(int map);
  * '' becomes null string, '''' becomes a string containing a single quote */
 uvlong tknize(char *str, char **arr, uvlong max);
 
-bool   chkrune(rune r) { return r < 0x110000 && (r < 0xd800 || r > 0xdfff); }
+static bool inline chkrune(rune r) { return r < 0x110000 && (r < 0xd800 || r > 0xdfff); }
 
 /* @brief Convert a Unicode rune to char sequences
  * @return The number of bytes stored */
@@ -124,8 +124,8 @@ uvlong runetochar(char *s, rune *r);
 uvlong chartorune(rune *r, char *s);
 
 /* @return The number of bytes required to convert r into UTF */
-int    runelen(rune r) {
-	return r < 0x80 ? 1 : r < 0x800 ? 2 : r < 0x10000 ? 3 : r < 0x110000 ? 4 : errmsg("Invalid Rune"), -1;
+static int inline runelen(rune r) {
+	return r < 0x80 ? 1 : r < 0x800 ? 2 : r < 0x10000 ? 3 : r < 0x110000 ? 4 : (errmsg("Invalid Rune"), -1);
 }
 
 /* @return The number of bytes required to convert the n runes pointed by r into UTF */
@@ -133,37 +133,46 @@ uvlong runenlen(rune *r, uvlong n);
 
 /* @brief Check if the char sequences represent a rune aright
  * @param[out] r Pointer to store the rune if the sequences are complete, can be null */
-bool   fullrune(char *s, int n, rune *r) {
+static bool inline fullrune(char *s, int n, rune *r) {
 	rune t;
-	return ( uchar ) s [0] < 0x80 ? (n != 1 ? false : r ? *r = s [0], true : true)
+	return ( uchar ) s [0] < 0x80 ? (n != 1 ? false
+	                                 : r    ? (*r = s [0], true)
+	                                        : true)
 	     : ( uchar ) s [0] < 0xe0
-	       ? (n != 2                    ? false
-			   : (s [0] & 0xe0) != 0xc0 ? false
-			   : (s [1] & 0xc0) != 0x80 ? false
-										: !chkrune(t = ((( rune ) s [0] & 0x1f) << 6 | s [1] & 0x3f))
-				 ? errmsg("Invalid Rune"),
-			   false : n != runelen(t) ? errmsg("UTF Overlong"), false : r ? *r = t, true : true)
+	       ? (n != 2                   ? false
+	          : (s [0] & 0xe0) != 0xc0 ? false
+	          : (s [1] & 0xc0) != 0x80 ? false
+	                                   : !chkrune(t = ((( rune ) s [0] & 0x1f) << 6 | s [1] & 0x3f))
+	            ? errmsg("Invalid Rune"),
+	          false
+	          : n != runelen(t) ? (errmsg("UTF Overlong"), false)
+	          : r               ? (*r = t, true)
+	                            : true)
 	     : ( uchar ) s [0] < 0xf0
-	       ? (n != 3                    ? false
-			   : (s [1] & 0xc0) != 0x80 ? false
-			   : (s [2] & 0xc0) != 0x80
-				 ? false
-				 : !chkrune(t = ((( rune ) s [0] & 0xf) << 12 | (( rune ) s [1] & 0x3f) << 6 | s [2] & 0x3f))
-				 ? errmsg("Invalid Rune"),
-			   false : n != runelen(t) ? errmsg("UTF Overlong"), false : r ? *r = t, true : true)
-	     : ( uchar ) s [0] < 0xf8
-	       ? (n != 4                    ? false
-			   : (s [1] & 0xc0) != 0x80 ? false
-			   : (s [2] & 0xc0) != 0x80 ? false
-			   : (s [3] & 0xc0) != 0x80
-				 ? false
-				 : !chkrune(
-					 t
-					 = ((( rune ) s [0] & 0x7) << 18 | (( rune ) s [1] & 0x3f) << 12 | (( rune ) s [2] & 0x3f) << 6 | s [3] & 0x3f)
-				   )
-				 ? errmsg("Invalid Rune"),
-			   false : n != runelen(t) ? errmsg("UTF Overlong"), false : r ? *r = t, true : true)
-	       : false;
+	       ? (n != 3                   ? false
+	          : (s [1] & 0xc0) != 0x80 ? false
+	          : (s [2] & 0xc0) != 0x80
+	            ? false
+	            : !chkrune(t = ((( rune ) s [0] & 0xf) << 12 | (( rune ) s [1] & 0x3f) << 6 | s [2] & 0x3f))
+	            ? errmsg("Invalid Rune"),
+	          false
+	          : n != runelen(t) ? (errmsg("UTF Overlong"), false)
+	          : r               ? (*r = t, true)
+	                            : true)
+	     : ( uchar ) s [0] < 0xf8 ? (n != 4                   ? false
+	                                 : (s [1] & 0xc0) != 0x80 ? false
+	                                 : (s [2] & 0xc0) != 0x80 ? false
+	                                 : (s [3] & 0xc0) != 0x80 ? false
+	                                                          : !chkrune(t = ((( rune ) s [0] & 0x7) << 18
+	                                                                          | (( rune ) s [1] & 0x3f) << 12
+	                                                                          | (( rune ) s [2] & 0x3f) << 6
+	                                                                          | s [3] & 0x3f))
+	                                   ? errmsg("Invalid Rune"),
+	                                 false
+	                                 : n != runelen(t) ? (errmsg("UTF Overlong"), false)
+	                                 : r               ? (*r = t, true)
+	                                                   : true)
+	                              : false;
 }
 
 /* @brief Copy char sequences until a null sequence has been copied, but writes no sequences beyond ed
@@ -187,11 +196,11 @@ typedef struct {
 	uvlong len;
 } slitr;
 
-slitr mkslitr(char *s, uvlong len) { return ( slitr ) {s, len}; }
+static slitr inline mkslitr(char *s, uvlong len) { return ( slitr ) {s, len}; }
 
 #define umslitr(s) s.s, s.len
 
-slitr subslitr(char *s, vlong start, vlong end) { return ( slitr ) {s + start, end - start + 1}; }
+static slitr inline subslitr(char *s, vlong start, vlong end) { return ( slitr ) {s + start, end - start + 1}; }
 
 rune  nth(slitr s, vlong n);
 /* Dynamic String */
@@ -225,7 +234,7 @@ void  repeat(int strand, uvlong n);
  * `x/%a+/ g/i/ v/../ c/I/` - Capitalize standalone "i" but not "i" in "this", "it", etc.
  * `x/{[^}]*}/ s/move\(([^,]+),([^)]+)\)/move(\2,\1)/` - Swap arguments in move function calls within braces.
  * @note Leftmost refers to the first match point, not the first pattern in alternation. e.g. /bcd|a|ab/ is the same as /ab|a|bcd/ for the string "abcde", since both will match "ab" regardless of the order of patterns. */
-void  sttregex(int strand, char *se);   // two-way search & Thompson NFA / Plan 9's VM
+int   sttregex(int arena, char *str, char *se);   // two-way search & Thompson NFA / Plan 9's VM
 void  rmstrand(int strand);
 int   catstr(int arena, ...);
 /* @return The descriptor for the char strand */
@@ -234,7 +243,7 @@ int   runetostr(int arena, rune *r);
 int   strtorune(int arena, char *s);
 #define vargs(...) vargs_(0, ##__VA_ARGS__)
 
-va_list vargs_(int dummy, ...) {
+static va_list inline vargs_(int dummy, ...) {
 	va_list args;
 	va_start(args, dummy);
 	return args;
@@ -276,11 +285,11 @@ enum
  * The s verb copies a NUL-terminated string (pointer to char) to the output. The number of characters copied (n) is the minimum of the size of the string and precision. These n characters are justified within a field of width characters as described above. If a precision is given, it is safe for the string not to be NUL-terminated as long as it is at least precision characters (not bytes!) long. The S verb interprets its pointer as an array of runes; the runes are converted to UTF before output.
  * The c verb copies a single char (promoted to int) justified within a field of width characters as described above. The C verb works on runes.
  * The p verb formats a pointer value. The r verb takes no arguments; it copies the error string returned by a call to errmsg().
- * The a verb takes an array and a format string, applying the format to each or multiple elements of the array. It interprets the flags 0, h, hh, l, ll, L, LL, u, ,, -, ;, and # to mean pad with zeros, array of short, byte, long, vlong, rlong, tlong, unsigned, floating type, left justified, array struct, and compound data type. The width and precision specify the field width and the number of elements, and if ; is not specified (thus a C array), precision cannot be omitted. The floating type flag can be used with h or l to interpret the argument as an array of float or long double. If # is specified, the verb takes an additional element size argument from the list to calculate offsets after each invocation. The a verb can be used to format arrays of any type, including user-defined types with custom verbs, and can be used recursively to format nested arrays. The format string can contain multiple verbs and dynamic width and precision specifications, in which case the elements will be applied in order, and the arguments follows the format string (or element size) in the list, which will be shared across invocations in the formatting process. E.g. `fmts(0, "{ %.4a }", arr, "%d, ")` will generate a strand like "{ 1, 2, 3, 4, }" for an int[4] array. For trailing commas, `fmts(0, "{ %.3a, %d }", arr, "%d, ", arr[3])`. For dynamic arrays, `fmts(0, "[ %.*a]", len, arr, "%d ")` or `fmts(0, "[ %;a]", arrst, "%d ")`. For dynamic width/precision in the format string, `fmts(0, "< %.*,a>", len, arr, "%.*f ", prec)`. For multiple verbs, `fmts(0, "(%.2ua, %ud => %ud)", arr6, "%ud => %ud, ", arr6[4], arr6[5])`. For custom verbs, `fmts(0, "%.4#a", arri, "%I", sizeof(itype))`. For nested arrays, `fmts(0, "%.3#a", arr9, "| %.3a|\n", sizeof(arr9[0]), "%d ")` will generate "| 1 2 3 |\n| 4 5 6 |\n| 7 8 9 |\n" for an int[3][3] array.
+ * The a verb takes an array and a format string, applying the format to each or multiple elements of the array. It interprets the flags 0, h, hh, l, ll, L, LL, u, ,, -, ;, and # to mean pad with zeros, array of short, byte, long, vlong, rlong, tlong, unsigned, floating type, left justified, array struct, and compound data type. The width and precision specify the field width and the number of elements, and if ; is not specified (thus a C array), precision cannot be omitted. The floating type flag can be used with h or l to interpret the argument as an array of float or long double. If # is specified, the verb takes an additional element size argument from the list to calculate offsets after each invocation. The a verb can be used to format arrays of any type, including user-defined types with custom verbs, and can be used recursively to format nested arrays. The format string can contain multiple verbs and dynamic width and precision specifications, in which case the elements will be applied in order, and the arguments follows the format string (or element size) in the list, which will be shared across invocations in the formatting process. E.g. `fmts(0, "{ %.4a }", arr, "%d, ")` will generate a strand like "{ 1, 2, 3, 4, }" for an int[4] array. For trailing commas, `fmts(0, "{ %.3a%d }", arr, "%d, ", arr[3])`. For dynamic arrays, `fmts(0, "[ %.*a]", len, arr, "%d ")` or `fmts(0, "[ %;a]", arrst, "%d ")`. For dynamic width/precision in the format string, `fmts(0, "< %.*,a>", len, arr, "%.*f ", prec)`. For multiple verbs, `fmts(0, "(%.2ua%ud => %ud)", arr6, "%ud => %ud, ", arr6[4], arr6[5])`. For custom verbs, `fmts(0, "%.4#a", arri, "%I", sizeof(itype))`. For nested arrays, `fmts(0, "%.3#a", arr9, "| %.3a|\n", sizeof(arr9[0]), "%d ")` will generate "| 1 2 3 |\n| 4 5 6 |\n| 7 8 9 |\n" for an int[3][3] array.
  * Custom Verbs may be installed using fmtinstall(). */
 int vfmts(int arena, char *fm, va_list args);
 
-int fmts(int arena, char *fm, ...) {
+static int inline fmts(int arena, char *fm, ...) {
 	va_list args;
 	va_start(args, fm);
 	int res = vfmts(arena, fm, args);
@@ -294,14 +303,14 @@ bool   dofmt(fmt *fp);
 void   fmtinstall(rune c, bool (*fn)(fmt *));
 
 int    mkmultiset(int arena);
-void   addms(int ms, array data);
+void   addms(int ms, arrst data);
 /* @brief Delete single instance */
-void   delms(int ms, array data);
+void   delms(int ms, arrst data);
 /* @brief Remove all occurrences */
-void   prgms(int ms, array data);
-bool   memms(int ms, array data);
+void   prgms(int ms, arrst data);
+bool   memms(int ms, arrst data);
 /* @brief Count occurrences of specific data */
-uvlong cntms(int ms, array data);
+uvlong cntms(int ms, arrst data);
 /* @brief Combine multiplicities */
 void   addtums(int dms, int ms);
 /* @brief Max multiplicity */

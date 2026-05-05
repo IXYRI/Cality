@@ -47,9 +47,9 @@ int mkxpedt(int arena);
  * @note The src-dst pair consists of the source element and the result destination */
 int fmap(int xpedt, int src, xrslt rs, void (*fn)(pair sd, void *), void *args);
 int filt(int xpedt, int src, bool (*pred)(arrst i, void *), void *args);
-int sort(int xpedt, int src, int (*cmp)(void *, void *, void *), void *args)   // smooth sort
-  /* @brief Collect source elements into a silo of specified type */
-  int mold(int xpedt, int src, silotype t);
+int sort(int xpedt, int src, int (*cmp)(void *, void *, void *), void *args);   // smooth sort
+/* @brief Collect source elements into a silo of specified type */
+int mold(int xpedt, int src, silotype t);
 /* @brief Fold the source silo into a single value
  * @param init Initial value of the result type */
 int pare(int xpedt, int src, xrslt rs, void *init, void (*red)(arrst acc, arrst i, arrst dst, void *), void *args);
@@ -83,9 +83,9 @@ int ximmix(int xpedt, int srca, int srcb);
 /* @brief Catenate two sources */
 int catena(int xpedt, int srca, int srcb);
 /* @brief Merge two sorted sources */
-int xmerge(int xpedt, int srca, int srcb, int (*cmp)(void *, void *, void *), void *args)   // merge sort
-  /* @brief Repeat the source infinitely */
-  int xrecur(int xpedt, int src);
+int xmerge(int xpedt, int srca, int srcb, int (*cmp)(void *, void *, void *), void *args);   // merge sort
+/* @brief Repeat the source infinitely */
+int xrecur(int xpedt, int src);
 /* @brief Slide a window over the source */
 int xorama(int xpedt, int src, uvlong size, uvlong stride);
 
